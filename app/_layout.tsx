@@ -1,12 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { Stack } from "expo-router";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import * as SplashScreen from "expo-splash-screen";
 import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 
+import { api } from "@/convex/_generated/api";
 import { convex } from "@/lib/convex";
 
 SplashScreen.setOptions({
@@ -24,7 +25,12 @@ if (!publishableKey) {
 
 const RootNavigator = () => {
   const { isLoaded: isClerkLoaded, isSignedIn } = useAuth();
-  const { isLoading: isConvexLoaded } = useConvexAuth();
+  const { isLoading: isConvexLoaded, isAuthenticated: isConvexAuthenticated } =
+    useConvexAuth();
+  const createProfileOnFirstLogin = useMutation(
+    api.profiles.createProfileOnFirstLogin,
+  );
+  const hasCreatedProfile = useRef(false);
   const isAuthenticated = isClerkLoaded && isSignedIn === true;
   const isUnauthenticated = isClerkLoaded && isSignedIn === false;
 
@@ -33,6 +39,19 @@ const RootNavigator = () => {
       SplashScreen.hide();
     }
   }, [isClerkLoaded, isConvexLoaded]);
+
+  useEffect(() => {
+    if (!isConvexAuthenticated) {
+      hasCreatedProfile.current = false;
+      return;
+    }
+    if (isConvexLoaded || hasCreatedProfile.current) {
+      return;
+    }
+
+    hasCreatedProfile.current = true;
+    void createProfileOnFirstLogin();
+  }, [isConvexAuthenticated, isConvexLoaded, createProfileOnFirstLogin]);
 
   return (
     <Stack
