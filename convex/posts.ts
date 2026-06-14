@@ -5,12 +5,12 @@ import { requireProfile } from "./lib/auth";
 
 export const createPost = mutation({
   args: {
-    imageStorageId: v.id("_storage"),
-    parkName: v.string(),
-    caption: v.optional(v.string()),
-    latitude: v.optional(v.number()),
-    longitude: v.optional(v.number()),
-  },
+  imageStorageId: v.optional(v.id("_storage")),
+  parkName: v.string(),
+  caption: v.optional(v.string()),
+  latitude: v.optional(v.number()),
+  longitude: v.optional(v.number()),
+},
   handler: async (ctx, args) => {
     const profile = await requireProfile(ctx);
 

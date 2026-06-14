@@ -14,7 +14,7 @@ export default defineSchema({
 
   posts: defineTable({
     authorId: v.id("profiles"),
-    imageStorageId: v.id("_storage"),
+    imageStorageId: v.optional(v.id("_storage")),
     caption: v.optional(v.string()),
     parkName: v.string(),
     latitude: v.optional(v.number()),
